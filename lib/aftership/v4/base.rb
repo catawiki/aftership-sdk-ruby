@@ -1,4 +1,4 @@
-require 'httpclient'
+require 'faraday'
 require 'json'
 
 module AfterShip
@@ -17,19 +17,18 @@ module AfterShip
         @query = query
         @body = body
         @trial = 0
-
-        @client = HTTPClient.new
+        @client = Faraday.new(:url => url, :headers => {
+          'aftership-api-key' => AfterShip.api_key,
+          'Content-Type' => 'application/json'
+        })
       end
 
       def call
-
-        header = {'aftership-api-key' => AfterShip.api_key, 'Content-Type' => 'application/json'}
-
-        parameters = {
-            :query => query,
-            :body => body.to_json,
-            :header => header
-        }
+        parameters = if http_verb_method == :post
+          body.to_json
+        else
+          { :query => query, :body => body.to_json }
+        end
 
         cf_ray = ''
         response = nil
@@ -40,7 +39,6 @@ module AfterShip
           if response.headers
             cf_ray = response.headers['CF-RAY']
           end
-
 
           if response.body
             begin
