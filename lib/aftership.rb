@@ -1,13 +1,20 @@
 $:.unshift File.dirname(__FILE__)
 
+require 'aftership/v4/configuration'
 require 'aftership/v4/courier'
 require 'aftership/v4/tracking'
 require 'aftership/v4/last_checkpoint'
 
 module AfterShip
   class << self;
-    attr_accessor :api_key
+    attr_accessor :configuration
   end
 
-  URL = ENV['AFTERSHIP_API_ENDPOINT'] || 'https://api.aftership.com'
+  def self.configuration
+    @configuration ||= AfterShip::V4::Configuration.new
+  end
+
+  def self.configure
+    yield(configuration)
+  end
 end
