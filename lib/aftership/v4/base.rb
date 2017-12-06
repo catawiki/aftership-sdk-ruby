@@ -8,16 +8,11 @@ module AfterShip
       end
       attr_reader :http_verb_method, :end_point, :query, :body
 
-      def initialize(http_verb_method, end_point, query = {}, body = {}, options = {})
+      def initialize(http_verb_method, end_point, query = {}, body = {})
         @http_verb_method = http_verb_method
         @end_point = end_point
         @query = query
         @body = body
-        @header = {
-          'aftership-api-key' => AfterShip.configuration.api_key,
-          'Content-Type' => 'application/json'
-        }.merge(AfterShip::V4::Configuration.headers)
-
         @client = HTTPClient.new
 
         if AfterShip.configuration.timeout.present?
@@ -29,7 +24,7 @@ module AfterShip
         parameters = {
             :query => query,
             :body => body.to_json,
-            :header => @header
+            :header => AfterShip.configuration.headers
         }
 
         cf_ray = ''
