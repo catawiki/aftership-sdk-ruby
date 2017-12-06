@@ -8,74 +8,64 @@ module AfterShip
       end
       attr_reader :http_verb_method, :end_point, :query, :body
 
-      MAX_TRIAL = 3
-      CALL_SLEEP = 3
-
-      def initialize(http_verb_method, end_point, query = {}, body = {})
+      def initialize(http_verb_method, end_point, query = {}, body = {}, options = {})
         @http_verb_method = http_verb_method
         @end_point = end_point
         @query = query
         @body = body
-        @trial = 0
+        @header = {
+          'aftership-api-key' => AfterShip.configuration.api_key,
+          'Content-Type' => 'application/json'
+        }.merge(AfterShip::V4::Configuration.headers)
 
         @client = HTTPClient.new
+
+        if AfterShip.configuration.timeout.present?
+          @client.send_timeout = AfterShip.configuration.timeout
+        end
       end
 
       def call
-
-        header = {'aftership-api-key' => AfterShip.api_key, 'Content-Type' => 'application/json'}
-
         parameters = {
             :query => query,
             :body => body.to_json,
-            :header => header
+            :header => @header
         }
 
         cf_ray = ''
-        response = nil
 
-        loop do
-          response = @client.send(http_verb_method, url, parameters)
+        response = @client.send(http_verb_method, url, parameters)
 
-          if response.headers
-            cf_ray = response.headers['CF-RAY']
-          end
+        if response.headers
+          cf_ray = response.headers['CF-RAY']
+        end
 
-
-          if response.body
-            begin
-              response = JSON.parse(response.body)
-              @trial = MAX_TRIAL + 1
-            rescue
-              @trial += 1
-
-              sleep CALL_SLEEP
-
-              response = {
-                  :meta => {
-                      :code => 500,
-                      :message => 'Something went wrong on AfterShip\'s end.',
-                      :type => 'InternalError'
-                  },
-                  :data => {
-                      :body => response.body,
-                      :cf_ray => cf_ray
-                  }
-              }
-            end
-          else
+        if response.body
+          begin
+            response = JSON.parse(response.body)
+          rescue
             response = {
-                :meta => {
-                    :code => 500,
-                    :message => 'Something went wrong on AfterShip\'s end.',
-                    :type => 'InternalError'
-                },
-                :data => {
-                }
+              :meta => {
+                :code => 500,
+                :message => 'Something went wrong on AfterShip\'s end.',
+                :type => 'InternalError'
+              },
+              :data => {
+                :body => response.body,
+                :cf_ray => cf_ray
+              }
             }
           end
-
-          break if @trial > MAX_TRIAL
+        else
+          response = {
+            :meta => {
+              :code => 500,
+              :message => 'Something went wrong on AfterShip\'s end.',
+              :type => 'InternalError'
+            },
+            :data => {
+            }
+          }
         end
 
         response
