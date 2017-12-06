@@ -21,13 +21,10 @@ module AfterShip
       end
 
       def call
-
-        header = {'aftership-api-key' => AfterShip.api_key, 'Content-Type' => 'application/json'}
-
         parameters = {
             :query => query,
             :body => body.to_json,
-            :header => header
+            :header => AfterShip.configuration.headers
         }
 
         begin
