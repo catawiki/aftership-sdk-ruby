@@ -14,6 +14,10 @@ module AfterShip
         @query = query
         @body = body
         @client = HTTPClient.new
+
+        if AfterShip.configuration.timeout.present?
+          @client.send_timeout = AfterShip.configuration.timeout
+        end
       end
 
       def call
