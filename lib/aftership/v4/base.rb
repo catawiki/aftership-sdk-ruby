@@ -29,42 +29,22 @@ module AfterShip
 
         begin
           response = @client.send(http_verb_method, url, parameters)
+          return JSON.parse(response.body) if response.body
 
-          if response.headers
-            cf_ray = response.headers['CF-RAY']
-          end
-
-
-          if response.body
-            begin
-              response = JSON.parse(response.body)
-              @trial = MAX_TRIAL + 1
-            rescue
-              @trial += 1
-
-              sleep CALL_SLEEP
-
-              response = {
-                  :meta => {
-                      :code => 500,
-                      :message => 'Something went wrong on AfterShip\'s end.',
-                      :type => 'InternalError'
-                  },
-                  :data => {
-                      :body => response.body,
-                      :cf_ray => cf_ray
-                  }
-              }
-            end
-          else
-            response = {
-                :meta => {
-                    :code => 500,
-                    :message => 'Something went wrong on AfterShip\'s end.',
-                    :type => 'InternalError'
-                },
-                :data => {
-                }
+          {
+            :meta => {
+              :code => 500,
+              :message => 'Something went wrong on AfterShip\'s end.',
+              :type => 'InternalError'
+            },
+            :data => {}
+          }
+        rescue HTTPClient::SendTimeoutError
+          {
+            :meta => {
+              :code => 408,
+              :message => 'AfterShip is busy at the moment.',
+              :type => 'SendTimeoutError'
             }
           }
         rescue JSON::ParserError
