@@ -8,16 +8,11 @@ module AfterShip
       end
       attr_reader :http_verb_method, :end_point, :query, :body
 
-      MAX_TRIAL = 3
-      CALL_SLEEP = 3
-
       def initialize(http_verb_method, end_point, query = {}, body = {})
         @http_verb_method = http_verb_method
         @end_point = end_point
         @query = query
         @body = body
-        @trial = 0
-
         @client = HTTPClient.new
       end
 
@@ -31,10 +26,7 @@ module AfterShip
             :header => header
         }
 
-        cf_ray = ''
-        response = nil
-
-        loop do
+        begin
           response = @client.send(http_verb_method, url, parameters)
 
           if response.headers
@@ -73,12 +65,20 @@ module AfterShip
                 :data => {
                 }
             }
-          end
-
-          break if @trial > MAX_TRIAL
+          }
+        rescue JSON::ParserError
+          {
+            :meta => {
+              :code => 500,
+              :message => 'Something went wrong on AfterShip\'s end.',
+              :type => 'InternalError'
+            },
+            :data => {
+              :body => response.body,
+              :cf_ray => cf_ray
+            }
+          }
         end
-
-        response
       end
 
       private
