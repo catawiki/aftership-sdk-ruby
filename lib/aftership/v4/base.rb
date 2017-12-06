@@ -65,9 +65,8 @@ module AfterShip
       private
 
       def url
-        "#{AfterShip::URL}/v4/#{end_point.to_s}"
+        "#{AfterShip.configuration.api_endpoint}/v4/#{end_point.to_s}"
       end
-
     end
   end
 end
