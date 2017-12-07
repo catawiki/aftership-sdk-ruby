@@ -57,6 +57,14 @@ module AfterShip
               :type => 'SendTimeoutError'
             }
           }
+        rescue HTTPClient::ReceiveTimeoutError
+          {
+            :meta => {
+              :code => 503,
+              :message => 'AfterShip is unavailable.',
+              :type => 'ReceiveTimeoutError'
+            }
+          }
         rescue JSON::ParserError
           {
             :meta => {
