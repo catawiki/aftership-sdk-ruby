@@ -41,6 +41,14 @@ module AfterShip
             },
             :data => {}
           }
+        rescue HTTPClient::ConnectTimeoutError
+          {
+            :meta => {
+              :code => 408,
+              :message => 'We cannot connect to AfterShip at this moment.',
+              :type => 'ConnectTimeoutError'
+            }
+          }
         rescue HTTPClient::SendTimeoutError
           {
             :meta => {
