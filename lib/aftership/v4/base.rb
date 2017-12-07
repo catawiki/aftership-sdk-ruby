@@ -15,7 +15,9 @@ module AfterShip
         @body = body
         @client = HTTPClient.new
 
-        @client.send_timeout = AfterShip.configuration.timeout
+        @client.connect_timeout = AfterShip.configuration.connect_timeout
+        @client.send_timeout = AfterShip.configuration.send_timeout
+        @client.receive_timeout = AfterShip.configuration.receive_timeout
       end
 
       def call
