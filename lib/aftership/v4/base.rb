@@ -29,6 +29,8 @@ module AfterShip
 
         begin
           response = @client.send(http_verb_method, url, parameters)
+          cf_ray = response.headers['CF-RAY']
+
           return JSON.parse(response.body) if response.body
 
           {
@@ -37,7 +39,9 @@ module AfterShip
               :message => 'Something went wrong on AfterShip\'s end.',
               :type => 'InternalError'
             },
-            :data => {}
+            :data => {
+              :cf_ray => cf_ray
+            }
           }
         rescue HTTPClient::SendTimeoutError
           {
