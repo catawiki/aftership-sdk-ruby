@@ -29,6 +29,8 @@ module AfterShip
 
         begin
           response = @client.send(http_verb_method, url, parameters)
+          cf_ray = response.headers['CF-RAY']
+
           return JSON.parse(response.body) if response.body
 
           {
