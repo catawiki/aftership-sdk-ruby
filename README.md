@@ -9,6 +9,15 @@ This extension helps developers to integrate with AfterShip easily.
 AfterShip provides an automated way for online merchants to track packages and send their customers delivery status notifications. Customers no longer need to deal with tracking numbers and track packages on their own. With AfterShip, online merchants extend their customer service after the point of purchase by keeping their customers actively informed, while saving time and money by reducing customers’ questions about the status of their purchase delivery.
 
 ### Changes
+* 2017-12-06 4.3.1.cw1
+  - Remove retry mechanism, including `sleep`ing the thread if request to the API is unsuccessful
+  - Introduced a `Configuration` object that encapsulates any gem configuration, like client `timeout` (in milliseconds), `headers`, `api_key` and `api_endpoint` (that defaults to `api.aftership.com`)
+    - Set the value of `configuration.send_timeout` to `HTTPClient#send_timeout`
+    - Set the value of `configuration.receive_timeout` to `HTTPClient#receive_timeout`
+    - Set the value of `configuration.connect_timeout` to `HTTPClient#connect_timeout`
+    - Set the `configuration.headers` to the request headers
+    - Use the `configuration.api_endpoint` as the main API endpoint for the gem
+
 * 2016-01-11 4.3.1
   - Updated gem `httpclient` version to 2.7.1
 
