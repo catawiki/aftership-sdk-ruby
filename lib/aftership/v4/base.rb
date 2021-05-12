@@ -8,7 +8,7 @@ module AfterShip
       end
       attr_reader :http_verb_method, :end_point, :query, :body
 
-      def initialize(http_verb_method, end_point, query = {}, body = {})
+      def initialize(http_verb_method, end_point, query = nil, body = nil)
         @http_verb_method = http_verb_method
         @end_point = end_point
         @query = query
@@ -23,9 +23,9 @@ module AfterShip
       def call
         parameters = {
             :query => query,
-            :body => body.to_json,
+            :body => body&.to_json,
             :header => AfterShip.configuration.headers
-        }
+        }.compact
 
         begin
           response = @client.send(http_verb_method, url, parameters)
